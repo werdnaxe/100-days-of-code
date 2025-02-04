@@ -3,30 +3,21 @@ import os
 import random as ran
 from art import logo
 
-def is_playing_blackjack():
+def keep_playing_blackjack():
     keep_playing = False
     response = input("Do you want to play a game of Blackjack? Type 'y' or 'n': ").lower()
-    if response == 'y' or response == 'yes':
+    if response == 'y':
         keep_playing = True
     return keep_playing
 
 def game_setup():
-    os.system('cls')
+    os.system('clear')
     print(logo)
 
-# def draw_cards(player_cards):
-#     for index in range(0, 2):
-#         player_cards.append(deal_card())
-
-def deal_cards(player_cards):
-    cards = [11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
+def deal_cards(cards, player_cards):
     for index in range(0, 2):
         player_cards.append(ran.choice(cards))
-    # first_card = ran.choice(cards)
-    # second_card = ran.choice(cards)
-    # return first_card + second_card
-    ran_card = ran.choice(cards)
-    return ran_card
+    return sum(player_cards)
 
 def has_blackjack(score):
     return score == 21
@@ -51,45 +42,92 @@ def has_ace(hand):
             break
     return ace
 
+def deal_single_card(cards, player_cards):
+    player_cards.append(ran.choice(cards))
+    return sum(player_cards)
 
+def print_score(user_score, user_cards, computer_score, computer_cards):
+    print(f"Your final hand: {user_cards}, final score: {user_score}")
+    print(f"Computer's final hand: {computer_cards}, final score: {computer_score}")
+    
+def play_game():
+    # Initialize deck, user and computer hand
+    cards = [11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
+    user_cards = []
+    computer_cards = []
 
-# Main
-in_game = True
-user_cards = []
-computer_cards = []
-while in_game:
-    if not is_playing_blackjack():
-        in_game = False
-        print("Exiting game")
+    # Clear screen and print logo
+    game_setup()
+
+    # Deal user and computer cards and add them up
+    user_score = deal_cards(cards, user_cards)
+    computer_score = deal_cards(cards, computer_cards)
+
+    # First check for Blackjack
+    if has_blackjack(user_score) and has_blackjack(computer_score):
+        print("It's a draw. You both have blackjacks.")
+        print_score(user_score, user_cards, computer_score, computer_cards)
+        return keep_playing_blackjack()
+    elif has_blackjack(user_score):
+        print("You have a blackjack. You win!")
+        print_score(user_score, user_cards, computer_score, computer_cards)
+        return keep_playing_blackjack()
+    elif has_blackjack(computer_score):
+        print("Computer has a blackjack. You lose.")
+        print_score(user_score, user_cards, computer_score, computer_cards)
+        return keep_playing_blackjack()
     else:
-        game_setup()
-        draw_cards(user_cards)
-        draw_cards(computer_cards)
-        user_score = user_cards[0] + user_cards[1]
-        print(user_score)
-        computer_score = computer_cards[0] + computer_cards[1]
-        print(computer_score)
-        if has_blackjack(user_score) and has_blackjack(computer_score):
-            print("It's a draw.")
-        elif has_blackjack(user_score):
-            print("You win!")
-        elif has_blackjack(computer_score):
-            print("You lose.")
-        else:
-            if is_over_21(user_score, user_cards) and is_over_21(computer_score, computer_cards):
-                print("You both lose.")
-                in_game = False
-                print("Exiting game")
-            elif is_over_21(user_score, user_cards):
-                print("Bust. You lose.")
-                in_game = False
-                print("Exiting game")
-            elif is_over_21(computer_score, computer_cards):
-                print("Computer bust. You win!")
-                in_game = False
-                print("Exiting game")
-            else:   # Neither is over 21
-                # Ask if user wants to draw again. Automate computer behavior.
-                print(f"Computer's first card: {computer_cards[0]}")
+        print(f"Your cards: {user_cards}, current score: {user_score}")
+        print(f"Computer's first card: {computer_cards[0]}")
 
+    # Next check if anyone is over 21
+    draw_again = True
+    while draw_again:
+        if is_over_21(user_score, user_cards) and is_over_21(computer_score, computer_cards):   # *** FIX THIS *** - Shouldn't fall through if 11 is changed to 1
+            print("You both lose.")
+            print_score(user_score, user_cards, computer_score, computer_cards)
+            return keep_playing_blackjack()
+        elif is_over_21(user_score, user_cards):   # *** FIX THIS ***
+            print("Bust. You lose.")
+            print_score(user_score, user_cards, computer_score, computer_cards)
+            return keep_playing_blackjack()
+        elif is_over_21(computer_score, computer_cards):   # *** FIX THIS ***
+            print("Computer bust. You win!")
+            print_score(user_score, user_cards, computer_score, computer_cards)
+            return keep_playing_blackjack()
+        else:   # neither is over 21
+            # Ask if user wants to draw again. Automate computer behavior.
+            if computer_score < 17:
+                computer_score = deal_single_card(cards, computer_cards)
+            if input("Type 'y' to get another card. Type 'n' to pass: ").lower() == 'y':
+                user_score = deal_single_card(cards, user_cards)
+                print(f"Your cards: {user_cards}, current score: {user_score}")
+            else:
+                draw_again = False
+
+    # Calculate winner
+    print_score(user_score, user_cards, computer_score, computer_cards)
+    if user_score > computer_score:
+        print("You win!")
+    elif user_score < computer_score:
+        if is_over_21(computer_score, computer_cards):
+            print("Computer bust. You win!")
+        else:
+            print("You lose.")
+    else:
+        print("It's a draw.")
+
+    # Ask if user wants to play again
+    return keep_playing_blackjack()
+        
+# Main
+in_game = False
+if input("Do you want to play a game of Blackjack? Type 'y' or 'n': ").lower() == 'y':
+    in_game = True
+    
+while in_game:
+    in_game = play_game()
+
+
+                
 
