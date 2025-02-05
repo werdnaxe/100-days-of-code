@@ -23,15 +23,13 @@ def has_blackjack(score):
     return score == 21
 
 def is_over_21(score, hand):
-    bust = False
     if score > 21:
         # hand is modified because it's passed as a reference to has_ace
         # and as a mutable list is changed outside the function as well
         if has_ace(hand):   # changes each occurrence of 11 to 1 upon call to has_ace
-            is_over_21(score, hand)
-        else:
-            bust = True
-    return bust
+            score -= 10
+            return is_over_21(score, hand)
+    return score
 
 def has_ace(hand):
     ace = False
@@ -83,15 +81,15 @@ def play_game():
     # Next check if anyone is over 21
     draw_again = True
     while draw_again:
-        if is_over_21(user_score, user_cards) and is_over_21(computer_score, computer_cards):   # *** FIX THIS *** - Shouldn't fall through if 11 is changed to 1
+        if user_score > 21 and computer_score > 21:
             print("You both lose.")
             print_score(user_score, user_cards, computer_score, computer_cards)
             return keep_playing_blackjack()
-        elif is_over_21(user_score, user_cards):   # *** FIX THIS ***
+        elif user_score > 21:
             print("Bust. You lose.")
             print_score(user_score, user_cards, computer_score, computer_cards)
             return keep_playing_blackjack()
-        elif is_over_21(computer_score, computer_cards):   # *** FIX THIS ***
+        elif computer_score > 21:
             print("Computer bust. You win!")
             print_score(user_score, user_cards, computer_score, computer_cards)
             return keep_playing_blackjack()
@@ -99,8 +97,10 @@ def play_game():
             # Ask if user wants to draw again. Automate computer behavior.
             if computer_score < 17:
                 computer_score = deal_single_card(cards, computer_cards)
+                computer_score = is_over_21(computer_score, computer_cards)
             if input("Type 'y' to get another card. Type 'n' to pass: ").lower() == 'y':
                 user_score = deal_single_card(cards, user_cards)
+                user_score = is_over_21(user_score, user_cards)
                 print(f"Your cards: {user_cards}, current score: {user_score}")
             else:
                 draw_again = False
