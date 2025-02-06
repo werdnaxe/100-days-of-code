@@ -1,0 +1,13 @@
+from art import logo
+
+in_game = True
+while in_game:
+    os("clear")
+    print(logo)
+    print("Welcome to the Number Guessing Game!\nI'm thinking of a number between 1 and 100.")
+    num_guesses = 0
+    if input("Choose a difficulty. Type 'easy' or 'hard': ").lower() == 'easy':
+        num_guesses = 5
+    else:
+        num_guesses = 10
+    
