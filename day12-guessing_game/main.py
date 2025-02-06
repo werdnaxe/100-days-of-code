@@ -62,5 +62,3 @@ while in_game:
     if input("Would you like to play again. Type 'yes' or 'no': ").lower() != 'yes':
         in_game = False
         print("Thank you for playing the Number Guessing Game.")
-        
-    
