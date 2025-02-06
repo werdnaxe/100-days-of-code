@@ -1,4 +1,3 @@
-#Blackjack
 import os
 import random as ran
 from art import logo
@@ -127,7 +126,3 @@ if input("Do you want to play a game of Blackjack? Type 'y' or 'n': ").lower() =
     
 while in_game:
     in_game = play_game()
-
-
-                
-
